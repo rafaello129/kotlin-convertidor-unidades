@@ -187,22 +187,52 @@ fun leerUnidadPeso(factoresPeso: Map<String, Double>, mensaje: String): String {
 fun convertirTiempo() {
     println()
     println("Conversion de tiempo")
-    println("Base temporal: horas a minutos")
 
-    val horas = leerCantidad()
-    val minutos = horas * 60
+    val factoresTiempo = mapOf(
+        "Segundos" to 1.0,
+        "Minutos" to 60.0,
+        "Horas" to 3600.0
+    )
 
-    println("Resultado: $horas horas = $minutos minutos")
+    println("Unidades disponibles:")
+    factoresTiempo.keys.forEach { unidad ->
+        println("- $unidad")
+    }
+
+    val unidadOrigen = leerUnidadTiempo(factoresTiempo, "Escribe la unidad de origen: ")
+    val unidadDestino = leerUnidadTiempo(factoresTiempo, "Escribe la unidad de destino: ")
+    val valorOriginal = leerCantidad()
+
+    val factorOrigen = factoresTiempo[unidadOrigen] ?: 1.0
+    val factorDestino = factoresTiempo[unidadDestino] ?: 1.0
+    val valorEnSegundos = valorOriginal * factorOrigen
+    val resultado = valorEnSegundos / factorDestino
+
+    println("Resultado: $valorOriginal $unidadOrigen = $resultado $unidadDestino")
 
     historial.add(
         RegistroConversion(
             categoria = "Tiempo",
-            unidadOrigen = "Horas",
-            unidadDestino = "Minutos",
-            valorOriginal = horas,
-            resultado = minutos
+            unidadOrigen = unidadOrigen,
+            unidadDestino = unidadDestino,
+            valorOriginal = valorOriginal,
+            resultado = resultado
         )
     )
+}
+
+fun leerUnidadTiempo(factoresTiempo: Map<String, Double>, mensaje: String): String {
+    while (true) {
+        print(mensaje)
+        val entrada = readlnOrNull()?.trim()
+        val unidad = factoresTiempo.keys.firstOrNull { it.equals(entrada, ignoreCase = true) }
+
+        if (unidad != null) {
+            return unidad
+        }
+
+        println("Unidad no valida. Escribe una unidad de la lista.")
+    }
 }
 
 fun mostrarHistorial() {
@@ -210,15 +240,13 @@ fun mostrarHistorial() {
     println("=== Historial de conversiones ===")
 
     if (historial.isEmpty()) {
-        println("Todavia no hay conversiones registradas.")
+        println("Todavía no hay conversiones registradas.")
         return
     }
 
     historial.forEachIndexed { indice, registro ->
-        println(
-            "${indice + 1}. ${registro.categoria}: " +
-                "${registro.valorOriginal} ${registro.unidadOrigen} = " +
-                "${registro.resultado} ${registro.unidadDestino}"
-        )
+        println("${indice + 1}. Categoria: ${registro.categoria}")
+        println("   Valor original: ${registro.valorOriginal} ${registro.unidadOrigen}")
+        println("   Resultado: ${registro.resultado} ${registro.unidadDestino}")
     }
 }
